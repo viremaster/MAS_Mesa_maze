@@ -2,7 +2,7 @@ from mesa import Model
 from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 
-from .agents import CyanWalker, RedWalker
+from .agents import CyanWalker, RedWalker, Finish
 from .schedule import RandomActivationByColour
 
 
@@ -48,8 +48,8 @@ class WalkerModel(Model):
         self.grid = MultiGrid(self.height, self.width, torus=False)
         self.datacollector = DataCollector(
             {
-                "Cyan Walkers": lambda m: m.schedule.get_colour_count(CyanWalker),
-                "Red Walkers": lambda m: m.schedule.get_colour_count(RedWalker),
+                "Finished Cyan Walkers": lambda m: m.schedule.get_finished_count(CyanWalker),
+                "Finished Red Walkers": lambda m: m.schedule.get_finished_count(RedWalker),
             }
         )
 
@@ -67,6 +67,12 @@ class WalkerModel(Model):
             walker = RedWalker(self.next_id(), (x, y), self, True)
             self.grid.place_agent(walker, (x, y))
             self.schedule.add(walker)
+
+        for x in range(17, 20):
+            for y in range(7, 13):
+                finish = Finish(self.next_id(), (x, y), self)
+                self.grid.place_agent(finish, (x, y))
+                self.schedule.add(finish)
 
         self.running = True
         self.datacollector.collect(self)

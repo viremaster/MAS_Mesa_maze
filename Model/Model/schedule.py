@@ -56,20 +56,28 @@ class RandomActivationByColour(RandomActivation):
         else:
             super().step()
 
-    def step_colour(self, breed):
+    def step_colour(self, colour):
         """
         Shuffle order and run all agents of a given breed.
 
         Args:
-            breed: Class object of the breed to run.
+            colour: Class object of the colour to run.
         """
-        agent_keys = list(self.agents_by_colour[breed].keys())
+        agent_keys = list(self.agents_by_colour[colour].keys())
         self.model.random.shuffle(agent_keys)
         for agent_key in agent_keys:
-            self.agents_by_colour[breed][agent_key].step()
+            self.agents_by_colour[colour][agent_key].step()
 
     def get_colour_count(self, colour_class):
         """
         Returns the current number of agents of certain breed in the queue.
         """
         return len(self.agents_by_colour[colour_class].values())
+
+    def get_finished_count(self, colour_class):
+        finished = 0
+        agent_keys = list(self.agents_by_colour[colour_class].keys())
+        for agent_key in agent_keys:
+            if self.agents_by_colour[colour_class][agent_key].finished:
+                finished += 1
+        return finished

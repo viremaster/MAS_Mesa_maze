@@ -2,7 +2,7 @@ from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import CanvasGrid, ChartModule
 from mesa.visualization.UserParam import UserSettableParameter
 
-from .agents import CyanWalker, RedWalker
+from .agents import CyanWalker, RedWalker, Finish
 from .model import WalkerModel
 
 
@@ -17,17 +17,25 @@ def walker_portrayal(agent):
         portrayal["scale"] = 0.9
         portrayal["Layer"] = 1
 
-    if type(agent) is RedWalker:
+    elif type(agent) is RedWalker:
         portrayal["Shape"] = "Model/resources/Red.png"
         portrayal["scale"] = 0.9
         portrayal["Layer"] = 1
+
+    elif type(agent) is Finish:
+        portrayal["Color"] = ["#008800"]
+        portrayal["Shape"] = "rect"
+        portrayal["Filled"] = "true"
+        portrayal["Layer"] = 0
+        portrayal["w"] = 1
+        portrayal["h"] = 1
 
     return portrayal
 
 
 canvas_element = CanvasGrid(walker_portrayal, 20, 20, 500, 500)
 chart_element = ChartModule(
-    [{"Label": "Cyan Walkers", "Color": "#00FFFF"}, {"Label": "Red Walkers", "Color": "#AA0000"}]
+    [{"Label": "Finished Cyan Walkers", "Color": "#00FFFF"}, {"Label": "Finished Red Walkers", "Color": "#AA0000"}]
 )
 
 model_params = {
