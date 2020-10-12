@@ -39,7 +39,6 @@ class CyanWalker(RandomWalker):
                 self.model.grid.place_agent(trace, previous_pos)
 
 
-
 class RedWalker(RandomWalker):
     """
     Walky boy but different colour
@@ -131,7 +130,6 @@ class ArrowTrace(Agent):
         self.direction = direction
 
     def sprite(self):
-        print("Yes")
         if self.direction == "Up":
             return "Model/resources/Up.png"
         elif self.direction == "Down":
