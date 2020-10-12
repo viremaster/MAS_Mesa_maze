@@ -57,14 +57,14 @@ class WalkerModel(Model):
         for i in range(self.initial_cyan_walkers):
             x = self.random.randrange(0, self.width - 13)
             y = self.random.randrange(0, self.height - 10)
-            walker = CyanWalker(self.next_id(), (x, y), self, True)
+            walker = CyanWalker(self.next_id(), (x, y), self, False)
             self.grid.place_agent(walker, (x, y))
             self.schedule.add(walker)
 
         for i in range(self.initial_red_walkers):
             x = self.random.randrange(0, self.width - 13)
             y = self.random.randrange(self.height - 10, self.height)
-            walker = RedWalker(self.next_id(), (x, y), self, True)
+            walker = RedWalker(self.next_id(), (x, y), self, False)
             self.grid.place_agent(walker, (x, y))
             self.schedule.add(walker)
 
@@ -72,7 +72,6 @@ class WalkerModel(Model):
             for y in range(7, 13):
                 finish = Finish(self.next_id(), (x, y), self)
                 self.grid.place_agent(finish, (x, y))
-                self.schedule.add(finish)
 
         self.running = True
         self.datacollector.collect(self)
