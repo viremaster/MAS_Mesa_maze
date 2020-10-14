@@ -1,20 +1,32 @@
 from mesa import Agent
-from .random_walk import RandomWalker
 
 
-class CyanWalker(RandomWalker):
+class CyanWalker(Agent):
     """
     Walky boy
     """
     finished = False
+    grid = None
+    x = None
+    y = None
+    moore = True
 
-    def __init__(self, unique_id, pos, model, moore):
-        super().__init__(unique_id, pos, model, moore=moore)
+    def __init__(self, unique_id, pos, model, moore=True):
+        """
+        grid: The MultiGrid object in which the agent lives.
+        x: The agent's current x coordinate
+        y: The agent's current y coordinate
+        moore: If True, may move in all 8 directions.
+                Otherwise, only up, down, left, right.
+        """
+        super().__init__(unique_id, model)
+        self.pos = pos
+        self.moore = moore
         self.finished = False
 
     def step(self):
         """
-        A model step. Move.
+        A model step. Move. Then check if you have finished, if so set your status to finished.
         """
         previous_pos = self.pos
 
@@ -24,35 +36,71 @@ class CyanWalker(RandomWalker):
         finish = [obj for obj in this_cell if isinstance(obj, Finish)]
         if finish:
             self.finished = True
-        else:
-            if self.pos[0] > previous_pos[0]:
-                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Right")
-                self.model.grid.place_agent(trace, previous_pos)
-            elif self.pos[0] < previous_pos[0]:
-                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Left")
-                self.model.grid.place_agent(trace, previous_pos)
-            elif self.pos[1] > previous_pos[1]:
-                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Up")
-                self.model.grid.place_agent(trace, previous_pos)
-            elif self.pos[1] < previous_pos[1]:
-                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Down")
-                self.model.grid.place_agent(trace, previous_pos)
+        """
+        --------
+        I Have Disabled the traces to reduce lag
+        --------
+        """
+        # else:
+        #     if self.pos[0] > previous_pos[0]:
+        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Right")
+        #         self.model.grid.place_agent(trace, previous_pos)
+        #     elif self.pos[0] < previous_pos[0]:
+        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Left")
+        #         self.model.grid.place_agent(trace, previous_pos)
+        #     elif self.pos[1] > previous_pos[1]:
+        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Up")
+        #         self.model.grid.place_agent(trace, previous_pos)
+        #     elif self.pos[1] < previous_pos[1]:
+        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Down")
+        #         self.model.grid.place_agent(trace, previous_pos)
+
+    def random_move(self):
+        """
+        Step one cell in any allowable direction.
+        """
+        # Pick the next cell from the adjacent cells
+        next_moves = self.model.grid.get_neighborhood(self.pos, moore=self.moore, include_center=False)
+        # Make a copy of the possible moves
+        next_moves_copy = next_moves.copy()
+
+        # For every possible move
+        for i in next_moves:
+            # Retrieve the types of the agents within the target of that move
+            i_types = self.model.grid.get_cell_list_contents(i)
+            """
+            You can add the walls into this statement.
+            """
+            # If there are types that are Walkers (or Walls)
+            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker)]
+            if occupied:
+                # Remove that move from the possibilities
+                next_moves_copy.remove(i)
+        # Add standing still to the possibilities
+        next_moves_copy.append(self.pos)
+        # Choose a move randomly
+        next_move = self.random.choice(next_moves_copy)
+        # Move
+        self.model.grid.move_agent(self, next_move)
 
 
-class RedWalker(RandomWalker):
+class RedWalker(Agent):
     """
-    Walky boy but different colour
+    Walky boy but different colour, comments for this class can be found in the CyanWalker class above.
     """
     finished = False
+    grid = None
+    x = None
+    y = None
+    moore = True
 
-    def __init__(self, unique_id, pos, model, moore):
-        super().__init__(unique_id, pos, model, moore=moore)
+    def __init__(self, unique_id, pos, model, moore=True):
+        super().__init__(unique_id, model)
+        self.pos = pos
+        self.moore = moore
         self.finished = False
 
     def step(self):
-        """
-        A model step. Move.
-        """
 
         previous_pos = self.pos
 
@@ -62,19 +110,38 @@ class RedWalker(RandomWalker):
         finish = [obj for obj in this_cell if isinstance(obj, Finish)]
         if finish:
             self.finished = True
-        else:
-            if self.pos[0] > previous_pos[0]:
-                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Right")
-                self.model.grid.place_agent(trace, previous_pos)
-            elif self.pos[0] < previous_pos[0]:
-                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Left")
-                self.model.grid.place_agent(trace, previous_pos)
-            elif self.pos[1] > previous_pos[1]:
-                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Up")
-                self.model.grid.place_agent(trace, previous_pos)
-            elif self.pos[1] < previous_pos[1]:
-                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Down")
-                self.model.grid.place_agent(trace, previous_pos)
+        """
+        --------
+        I Have Disabled the traces to reduce lag
+        --------
+        """
+        # else:
+        #     if self.pos[0] > previous_pos[0]:
+        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Right")
+        #         self.model.grid.place_agent(trace, previous_pos)
+        #     elif self.pos[0] < previous_pos[0]:
+        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Left")
+        #         self.model.grid.place_agent(trace, previous_pos)
+        #     elif self.pos[1] > previous_pos[1]:
+        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Up")
+        #         self.model.grid.place_agent(trace, previous_pos)
+        #     elif self.pos[1] < previous_pos[1]:
+        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Down")
+        #         self.model.grid.place_agent(trace, previous_pos)
+
+    def random_move(self):
+        next_moves = self.model.grid.get_neighborhood(self.pos, moore=self.moore, include_center=False)
+        next_moves_copy = next_moves.copy()
+        count = 0
+        for i in next_moves:
+            count += 1
+            i_types = self.model.grid.get_cell_list_contents(i)
+            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker)]
+            if occupied:
+                next_moves_copy.remove(i)
+        next_moves_copy.append(self.pos)
+        next_move = self.random.choice(next_moves_copy)
+        self.model.grid.move_agent(self, next_move)
 
 
 class Finish(Agent):

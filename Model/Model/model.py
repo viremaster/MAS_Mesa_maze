@@ -54,22 +54,63 @@ class WalkerModel(Model):
         )
 
         # Create walkers:
+
+        # For each Cyan walker
         for i in range(self.initial_cyan_walkers):
+            # Pick a random spot (Within the boundary)
             x = self.random.randrange(0, self.width - 13)
             y = self.random.randrange(0, self.height - 10)
+
+            # Check if it is occupied by another CyanWalker
+            occupied = False
+            for j in self.grid[x][y]:
+                if type(j) == CyanWalker:
+                    occupied = True
+
+            # While the spot is occupied
+            while occupied:
+                # Pick a random spot (Within the boundary)
+                x = self.random.randrange(0, self.width - 13)
+                y = self.random.randrange(0, self.height - 10)
+
+                # Check if it is occupied by another CyanWalker
+                occupied = False
+                for j in self.grid[x][y]:
+                    if type(j) == CyanWalker:
+                        occupied = True
+
+            # Make the walker and place it on the grid and the schedule
             walker = CyanWalker(self.next_id(), (x, y), self, False)
             self.grid.place_agent(walker, (x, y))
             self.schedule.add(walker)
 
+        # The red walkers work in the same fashion as the Cyan walkers
         for i in range(self.initial_red_walkers):
             x = self.random.randrange(0, self.width - 13)
             y = self.random.randrange(self.height - 10, self.height)
+
+            occupied = False
+            for j in self.grid[x][y]:
+                if type(j) == RedWalker:
+                    occupied = True
+
+            while occupied:
+                x = self.random.randrange(0, self.width - 13)
+                y = self.random.randrange(self.height - 10, self.height)
+
+                occupied = False
+                for j in self.grid[x][y]:
+                    if type(j) == RedWalker:
+                        occupied = True
+
             walker = RedWalker(self.next_id(), (x, y), self, False)
             self.grid.place_agent(walker, (x, y))
             self.schedule.add(walker)
 
+        # In all x's and y's in the range.
         for x in range(17, 20):
             for y in range(7, 13):
+                # Add a finish agent
                 finish = Finish(self.next_id(), (x, y), self)
                 self.grid.place_agent(finish, (x, y))
 

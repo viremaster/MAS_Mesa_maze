@@ -75,6 +75,9 @@ class RandomActivationByColour(RandomActivation):
         return len(self.agents_by_colour[colour_class].values())
 
     def get_finished_count(self, colour_class):
+        """
+        Returns the amount of finished agents of a certain colour.
+        """
         finished = 0
         agent_keys = list(self.agents_by_colour[colour_class].keys())
         for agent_key in agent_keys:
