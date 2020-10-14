@@ -7,6 +7,10 @@ from .model import WalkerModel
 
 
 def walker_portrayal(agent):
+    """
+    Gives a portrayal of every agent.
+    """
+
     if agent is None:
         return
 
