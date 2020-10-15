@@ -2,7 +2,7 @@ from mesa import Model
 from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 
-from .agents import CyanWalker, RedWalker, Finish
+from .agents import CyanWalker, RedWalker, Finish, Wall
 from .schedule import RandomActivationByColour
 
 
@@ -29,6 +29,7 @@ class WalkerModel(Model):
         width=20,
         initial_cyan_walkers=10,
         initial_red_walkers=10,
+        initial_walls = 100
     ):
         """
         Create a new walker model with the given parameters.
@@ -36,6 +37,7 @@ class WalkerModel(Model):
         Args:
             initial_cyan_walkers: Number of cyan walkers to start with
             initial_red_walkers: Number of red walkers to start with
+            initial_walls : number of wall elements in the maze
         """
         super().__init__()
         # Set parameters
@@ -43,6 +45,7 @@ class WalkerModel(Model):
         self.width = width
         self.initial_cyan_walkers = initial_cyan_walkers
         self.initial_red_walkers = initial_red_walkers
+        self.walls = initial_walls
 
         self.schedule = RandomActivationByColour(self)
         self.grid = MultiGrid(self.height, self.width, torus=False)
@@ -53,17 +56,61 @@ class WalkerModel(Model):
             }
         )
 
+        # Create walls:
+        for i in range(0,80):
+            x = self.random.randrange(0, self.width)
+            y = self.random.randrange(0, self.height)
+            wall = Wall(self.next_id(), (x,y), self)
+            self.grid.place_agent(wall, (x,y))
+
         # Create walkers:
         for i in range(self.initial_cyan_walkers):
             x = self.random.randrange(0, self.width - 13)
             y = self.random.randrange(0, self.height - 10)
-            walker = CyanWalker(self.next_id(), (x, y), self, False)
-            self.grid.place_agent(walker, (x, y))
-            self.schedule.add(walker)
 
+            # Check if it is occupied by another CyanWalker
+            occupied = False
+            for j in self.grid[x][y]:
+                if type(j) == CyanWalker or type(j) == Wall:
+                    occupied = True
+
+            #while the spot is occupied
+            while occupied:
+                # Pick a random spot (within the boundary)
+                x = self.random.randrange(0, self.width - 13)
+                y = self.random.randrange(0, self.height - 10)
+
+                # Check if it is occupied by another CyanWalker
+                occupied = False
+                for j in self.grid[x][y]:
+                    if type(j) == CyanWalker or type(j) == Wall:
+                        occupied = True
+
+         # Make the walker and place it on the grid and the schedule
+        walker = CyanWalker(self.next_id(), (x, y), self, False)
+        self.grid.place_agent(walker, (x, y))
+        self.schedule.add(walker)
+
+
+        # The red walkers work in the same fashion as the Cyan walkers
         for i in range(self.initial_red_walkers):
             x = self.random.randrange(0, self.width - 13)
             y = self.random.randrange(self.height - 10, self.height)
+
+            occupied = False
+            for j in self.grid[x][y]:
+                if type(j) == RedWalker or type(j) == Wall:
+                    occupied = True
+
+            while occupied:
+                x = self.random.randrange(0, self.width - 13)
+                y = self.random.randrange(self.height - 10, self.height)
+
+                occupied = False
+                for j in self.grid[x][y]:
+                    if type(j) == RedWalker or type(j) == Wall:
+                        occupied = True
+
             walker = RedWalker(self.next_id(), (x, y), self, False)
             self.grid.place_agent(walker, (x, y))
             self.schedule.add(walker)

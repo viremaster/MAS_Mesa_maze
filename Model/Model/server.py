@@ -2,7 +2,7 @@ from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import CanvasGrid, ChartModule
 from mesa.visualization.UserParam import UserSettableParameter
 
-from .agents import CyanWalker, RedWalker, Finish, Trace, ArrowTrace
+from .agents import CyanWalker, RedWalker, Finish, Wall, Trace, ArrowTrace
 from .model import WalkerModel
 
 
@@ -27,6 +27,14 @@ def walker_portrayal(agent):
         portrayal["Shape"] = "rect"
         portrayal["Filled"] = "true"
         portrayal["Layer"] = 0
+        portrayal["w"] = 1
+        portrayal["h"] = 1
+
+    elif type(agent) is Wall:
+        portrayal["Color"] = ["#808080"]
+        portrayal["Shape"] = "rect"
+        portrayal["Filled"] = "true"
+        portrayal["Layer"] = 1
         portrayal["w"] = 1
         portrayal["h"] = 1
 
@@ -57,6 +65,9 @@ model_params = {
     "initial_red_walkers": UserSettableParameter(
         "slider", "Initial red walkers", 10, 1, 50
     ),
+    "initial_walls": UserSettableParameter(
+        "slider", "Number of wall elements", 200, 1, 400
+    )
 }
 
 server = ModularServer(

@@ -7,14 +7,20 @@ class CyanWalker(RandomWalker):
     Walky boy
     """
     finished = False
+    grid = None
+    x = None
+    y = None
+    moore = True
 
     def __init__(self, unique_id, pos, model, moore):
         super().__init__(unique_id, pos, model, moore=moore)
+        self.pos = pos
+        self.moore = moore
         self.finished = False
 
     def step(self):
         """
-        A model step. Move.
+        A model step. Move. Then check if you have finished, if so set your status to finished.
         """
         previous_pos = self.pos
 
@@ -38,12 +44,44 @@ class CyanWalker(RandomWalker):
                 trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Down")
                 self.model.grid.place_agent(trace, previous_pos)
 
+    def random_move(self):
+        """
+        Step one cell in any allowable direction.
+        """
+        # Pick the next cell from the adjacent cells
+        next_moves = self.model.grid.get_neighborhood(self.pos, moore=self.moore, include_center=False)
+        # Make a copy of the possible moves
+        next_moves_copy = next_moves.copy()
+
+        # For every possible move
+        for i in next_moves:
+            # Retrieve the types of the agents within the target of that move
+            i_types = self.model.grid.get_cell_list_contents(i)
+            """
+            You can add the walls into this statement.
+            """
+            # If there are types that are Walkers (or Walls)
+            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall)]
+            if occupied:
+                # Remove that move from the possibilities
+                next_moves_copy.remove(i)
+        # Add standing still to the possibilities
+        next_moves_copy.append(self.pos)
+        # Choose a move randomly
+        next_move = self.random.choice(next_moves_copy)
+        # Move
+        self.model.grid.move_agent(self, next_move)
 
 class RedWalker(RandomWalker):
     """
-    Walky boy but different colour
+     Walky boy but different colour, comments for this class can be found in the CyanWalker class above
     """
+
     finished = False
+    grid = None
+    x = None
+    y = None
+    moore = True
 
     def __init__(self, unique_id, pos, model, moore):
         super().__init__(unique_id, pos, model, moore=moore)
@@ -76,6 +114,19 @@ class RedWalker(RandomWalker):
                 trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Down")
                 self.model.grid.place_agent(trace, previous_pos)
 
+    def random_move(self):
+        next_moves = self.model.grid.get_neighborhood(self.pos, moore=self.moore, include_center=False)
+        next_moves_copy = next_moves.copy()
+        count = 0
+        for i in next_moves:
+            count += 1
+            i_types = self.model.grid.get_cell_list_contents(i)
+            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall)]
+            if occupied:
+                next_moves_copy.remove(i)
+        next_moves_copy.append(self.pos)
+        next_move = self.random.choice(next_moves_copy)
+        self.model.grid.move_agent(self, next_move)
 
 class Finish(Agent):
 
@@ -86,6 +137,15 @@ class Finish(Agent):
     def step(self):
         pass
 
+
+class Wall(Agent):
+
+    def __init__(self, unique_id, pos, model):
+        super().__init__(unique_id, model)
+        self.pos = pos
+
+    def step(self):
+        pass
 
 class Trace(Agent):
 
