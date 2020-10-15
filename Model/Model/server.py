@@ -70,6 +70,7 @@ model_params = {
     )
 }
 
+
 server = ModularServer(
     WalkerModel, [canvas_element, chart_element], "Walking", model_params
 )

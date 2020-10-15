@@ -63,8 +63,9 @@ class WalkerModel(Model):
             wall = Wall(self.next_id(), (x,y), self)
             self.grid.place_agent(wall, (x,y))
 
-        # Create walkers:
+        # For each Cyan walker
         for i in range(self.initial_cyan_walkers):
+            # Pick a random spot (Within the boundary)
             x = self.random.randrange(0, self.width - 13)
             y = self.random.randrange(0, self.height - 10)
 
@@ -74,23 +75,22 @@ class WalkerModel(Model):
                 if type(j) == CyanWalker or type(j) == Wall:
                     occupied = True
 
-            #while the spot is occupied
+            # While the spot is occupied
             while occupied:
-                # Pick a random spot (within the boundary)
+                # Pick a random spot (Within the boundary)
                 x = self.random.randrange(0, self.width - 13)
                 y = self.random.randrange(0, self.height - 10)
 
                 # Check if it is occupied by another CyanWalker
                 occupied = False
                 for j in self.grid[x][y]:
-                    if type(j) == CyanWalker or type(j) == Wall:
+                    if type(j) == CyanWalker:
                         occupied = True
 
-         # Make the walker and place it on the grid and the schedule
-        walker = CyanWalker(self.next_id(), (x, y), self, False)
-        self.grid.place_agent(walker, (x, y))
-        self.schedule.add(walker)
-
+            # Make the walker and place it on the grid and the schedule
+            walker = CyanWalker(self.next_id(), (x, y), self, False)
+            self.grid.place_agent(walker, (x, y))
+            self.schedule.add(walker)
 
         # The red walkers work in the same fashion as the Cyan walkers
         for i in range(self.initial_red_walkers):
@@ -108,7 +108,7 @@ class WalkerModel(Model):
 
                 occupied = False
                 for j in self.grid[x][y]:
-                    if type(j) == RedWalker or type(j) == Wall:
+                     if type(j) == RedWalker:
                         occupied = True
 
             walker = RedWalker(self.next_id(), (x, y), self, False)
