@@ -16,6 +16,7 @@ class WalkerModel(Model):
 
     initial_cyan_walkers = 10
     initial_red_walkers = 10
+    initial_walls = 100
 
     verbose = False  # Print-monitoring
 
@@ -45,7 +46,7 @@ class WalkerModel(Model):
         self.width = width
         self.initial_cyan_walkers = initial_cyan_walkers
         self.initial_red_walkers = initial_red_walkers
-        self.walls = initial_walls
+        self.initial_walls = initial_walls
 
         self.schedule = RandomActivationByColour(self)
         self.grid = MultiGrid(self.height, self.width, torus=False)
@@ -57,7 +58,7 @@ class WalkerModel(Model):
         )
 
         # Create walls:
-        for i in range(0,80):
+        for i in range(0,self.initial_walls):
             x = self.random.randrange(0, self.width)
             y = self.random.randrange(0, self.height)
             wall = Wall(self.next_id(), (x,y), self)
