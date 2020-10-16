@@ -1,6 +1,8 @@
 from mesa import Agent
 from .random_walk import RandomWalker
 
+red_obstacle = False
+cyan_obstacle = False
 
 class CyanWalker(RandomWalker):
     """
@@ -91,23 +93,31 @@ class RedWalker(RandomWalker):
     """
      Walky boy but different colour, comments for this class can be found in the CyanWalker class above
     """
+    global red_obstacle
 
     finished = False
     grid = None
     x = None
     y = None
     moore = True
-    red_obstacle_present = False
+    red_obstacle_present = red_obstacle
 
     def __init__(self, unique_id, pos, model, moore, red_obstacle_present):
         super().__init__(unique_id, pos, model, moore=moore)
         self.finished = False
-        self.red_obstacle_present = False
+        self.red_obstacle_present = red_obstacle
+        self.obstacle = RedObstacle(self.model.next_id(), self.pos, self.model, 10)
 
     def step(self):
         """
         A model step. Move.
         """
+        global red_obstacle
+        if self.obstacle.present == 0:
+            self.obstacle.present = -1
+            self.model.schedule.remove(self.obstacle)
+            self.model.grid.remove_agent(self.obstacle)
+            red_obstacle = False
 
         previous_pos = self.pos
 
@@ -115,6 +125,7 @@ class RedWalker(RandomWalker):
 
         this_cell = self.model.grid.get_cell_list_contents([self.pos])
         finish = [obj for obj in this_cell if isinstance(obj, Finish)]
+
         if finish:
             self.finished = True
         else:
@@ -132,6 +143,7 @@ class RedWalker(RandomWalker):
                 self.model.grid.place_agent(trace, previous_pos)
 
     def random_move(self):
+        global red_obstacle
         next_moves = self.model.grid.get_neighborhood(self.pos, moore=self.moore, include_center=False)
         next_moves_copy = next_moves.copy()
         count = 0
@@ -144,17 +156,18 @@ class RedWalker(RandomWalker):
         next_moves_copy.append(self.pos)
 
         # Add dropping an obstacle to the possibilities
-        if self.red_obstacle_present == False:
+        if red_obstacle == False:
             next_moves_copy.append("drop_obstacle")
         # Choose a move randomly
         next_move = self.random.choice(next_moves_copy)
         # Move
-        obstacle = RedObstacle(self.model.next_id(), self.pos, self.model, 10)
         if next_move != 'drop_obstacle':
             self.model.grid.move_agent(self, next_move)
         else:
-            self.model.grid.place_agent(obstacle, self.pos)
-            self.red_obstacle_present = True
+            self.model.grid.place_agent(self.obstacle, self.pos)
+            self.model.schedule.add(self.obstacle)
+            red_obstacle = True
+
 
 class Finish(Agent):
 
@@ -182,7 +195,8 @@ class RedObstacle(Agent):
         self.present = present
 
     def step(self):
-        pass
+        if self.present >= 1:
+            self.present -=1
 
 class CyanObstacle(Agent):
 
@@ -192,7 +206,8 @@ class CyanObstacle(Agent):
         self.present = present
 
     def step(self):
-        pass
+        if self.present >= 1:
+            self.present -=1
 
 class Trace(Agent):
 
