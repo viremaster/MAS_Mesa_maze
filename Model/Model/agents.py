@@ -11,12 +11,14 @@ class CyanWalker(RandomWalker):
     x = None
     y = None
     moore = True
+    cyan_obstacle_present = False
 
-    def __init__(self, unique_id, pos, model, moore):
+    def __init__(self, unique_id, pos, model, moore, cyan_obstacle_present):
         super().__init__(unique_id, pos, model, moore=moore)
         self.pos = pos
         self.moore = moore
         self.finished = False
+        self.cyan_obstacle_present = False
 
     def step(self):
         """
@@ -61,16 +63,29 @@ class CyanWalker(RandomWalker):
             You can add the walls into this statement.
             """
             # If there are types that are Walkers (or Walls)
-            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall)]
+            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, RedObstacle)]
             if occupied:
                 # Remove that move from the possibilities
                 next_moves_copy.remove(i)
         # Add standing still to the possibilities
         next_moves_copy.append(self.pos)
+        # Add dropping an obstacle to the possibilities
+        if self.cyan_obstacle_present == False:
+            next_moves_copy.append("drop_obstacle")
         # Choose a move randomly
         next_move = self.random.choice(next_moves_copy)
         # Move
-        self.model.grid.move_agent(self, next_move)
+        obstacle = CyanObstacle(self.model.next_id(), self.pos, self.model, 10)
+        if next_move != 'drop_obstacle':
+            self.model.grid.move_agent(self, next_move)
+        else:
+            self.model.grid.place_agent(obstacle, self.pos)
+            self.cyan_obstacle_present = True
+        if obstacle.present == 0:
+            del obstacle
+            self.cyan_obstacle_present = False
+
+
 
 class RedWalker(RandomWalker):
     """
@@ -82,10 +97,12 @@ class RedWalker(RandomWalker):
     x = None
     y = None
     moore = True
+    red_obstacle_present = False
 
-    def __init__(self, unique_id, pos, model, moore):
+    def __init__(self, unique_id, pos, model, moore, red_obstacle_present):
         super().__init__(unique_id, pos, model, moore=moore)
         self.finished = False
+        self.red_obstacle_present = False
 
     def step(self):
         """
@@ -121,12 +138,23 @@ class RedWalker(RandomWalker):
         for i in next_moves:
             count += 1
             i_types = self.model.grid.get_cell_list_contents(i)
-            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall)]
+            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, CyanObstacle)]
             if occupied:
                 next_moves_copy.remove(i)
         next_moves_copy.append(self.pos)
+
+        # Add dropping an obstacle to the possibilities
+        if self.red_obstacle_present == False:
+            next_moves_copy.append("drop_obstacle")
+        # Choose a move randomly
         next_move = self.random.choice(next_moves_copy)
-        self.model.grid.move_agent(self, next_move)
+        # Move
+        obstacle = RedObstacle(self.model.next_id(), self.pos, self.model, 10)
+        if next_move != 'drop_obstacle':
+            self.model.grid.move_agent(self, next_move)
+        else:
+            self.model.grid.place_agent(obstacle, self.pos)
+            self.red_obstacle_present = True
 
 class Finish(Agent):
 
@@ -137,12 +165,31 @@ class Finish(Agent):
     def step(self):
         pass
 
-
 class Wall(Agent):
 
     def __init__(self, unique_id, pos, model):
         super().__init__(unique_id, model)
         self.pos = pos
+
+    def step(self):
+        pass
+
+class RedObstacle(Agent):
+
+    def __init__(self,unique_id, pos, model, present):
+        super().__init__(unique_id, model)
+        self.pos = pos
+        self.present = present
+
+    def step(self):
+        pass
+
+class CyanObstacle(Agent):
+
+    def __init__(self, unique_id, pos, model, present):
+        super().__init__(unique_id, model)
+        self.pos = pos
+        self.present = present
 
     def step(self):
         pass
@@ -177,7 +224,6 @@ class Trace(Agent):
                 self.colour = "#FF" + str(owner_colour) + "F"
             else:
                 self.colour = "#" + str(owner_colour) + "FFF"
-
 
 class ArrowTrace(Agent):
     owner = 0

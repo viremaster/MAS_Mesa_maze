@@ -2,7 +2,7 @@ from mesa import Model
 from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 
-from .agents import CyanWalker, RedWalker, Finish, Wall
+from .agents import CyanWalker, RedWalker, Finish, Wall, CyanObstacle, RedObstacle
 from .schedule import RandomActivationByColour
 
 
@@ -89,7 +89,7 @@ class WalkerModel(Model):
                         occupied = True
 
             # Make the walker and place it on the grid and the schedule
-            walker = CyanWalker(self.next_id(), (x, y), self, False)
+            walker = CyanWalker(self.next_id(), (x, y), self, False, False)
             self.grid.place_agent(walker, (x, y))
             self.schedule.add(walker)
 
@@ -112,7 +112,7 @@ class WalkerModel(Model):
                      if type(j) == RedWalker:
                         occupied = True
 
-            walker = RedWalker(self.next_id(), (x, y), self, False)
+            walker = RedWalker(self.next_id(), (x, y), self, False, False)
             self.grid.place_agent(walker, (x, y))
             self.schedule.add(walker)
 
