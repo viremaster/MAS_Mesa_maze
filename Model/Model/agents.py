@@ -1,4 +1,5 @@
 from mesa import Agent
+from random import randint
 
 
 class CyanWalker(Agent):
@@ -10,6 +11,8 @@ class CyanWalker(Agent):
     x = None
     y = None
     moore = True
+    first = True
+    previous_trace = []
 
     def __init__(self, unique_id, pos, model, moore=True):
         """
@@ -32,28 +35,29 @@ class CyanWalker(Agent):
 
         self.random_move()
 
+        if not self.finished and not previous_pos == self.pos:
+            if self.pos[0] > previous_pos[0]:
+                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Right")
+                self.model.grid.place_agent(trace, previous_pos)
+            elif self.pos[0] < previous_pos[0]:
+                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Left")
+                self.model.grid.place_agent(trace, previous_pos)
+            elif self.pos[1] > previous_pos[1]:
+                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Up")
+                self.model.grid.place_agent(trace, previous_pos)
+            elif self.pos[1] < previous_pos[1]:
+                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Down")
+                self.model.grid.place_agent(trace, previous_pos)
+            if not self.first:
+                self.previous_trace.set_next(trace)
+            self.previous_trace = trace
+            if self.first:
+                self.first = False
+
         this_cell = self.model.grid.get_cell_list_contents([self.pos])
         finish = [obj for obj in this_cell if isinstance(obj, Finish)]
         if finish:
             self.finished = True
-        """
-        --------
-        I Have Disabled the traces to reduce lag
-        --------
-        """
-        # else:
-        #     if self.pos[0] > previous_pos[0]:
-        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Right")
-        #         self.model.grid.place_agent(trace, previous_pos)
-        #     elif self.pos[0] < previous_pos[0]:
-        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Left")
-        #         self.model.grid.place_agent(trace, previous_pos)
-        #     elif self.pos[1] > previous_pos[1]:
-        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Up")
-        #         self.model.grid.place_agent(trace, previous_pos)
-        #     elif self.pos[1] < previous_pos[1]:
-        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Down")
-        #         self.model.grid.place_agent(trace, previous_pos)
 
     def random_move(self):
         """
@@ -93,6 +97,9 @@ class RedWalker(Agent):
     x = None
     y = None
     moore = True
+    first = True
+    previous_trace = []
+    following_trace = []
 
     def __init__(self, unique_id, pos, model, moore=True):
         super().__init__(unique_id, model)
@@ -104,30 +111,31 @@ class RedWalker(Agent):
 
         previous_pos = self.pos
 
-        self.random_move()
+        self.non_random_move()
+
+        if not self.finished and not previous_pos == self.pos:
+            if self.pos[0] > previous_pos[0]:
+                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Right")
+                self.model.grid.place_agent(trace, previous_pos)
+            elif self.pos[0] < previous_pos[0]:
+                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Left")
+                self.model.grid.place_agent(trace, previous_pos)
+            elif self.pos[1] > previous_pos[1]:
+                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Up")
+                self.model.grid.place_agent(trace, previous_pos)
+            elif self.pos[1] < previous_pos[1]:
+                trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Down")
+                self.model.grid.place_agent(trace, previous_pos)
+            if not self.first:
+                self.previous_trace.set_next(trace)
+            self.previous_trace = trace
+            if self.first:
+                self.first = False
 
         this_cell = self.model.grid.get_cell_list_contents([self.pos])
         finish = [obj for obj in this_cell if isinstance(obj, Finish)]
         if finish:
             self.finished = True
-        """
-        --------
-        I Have Disabled the traces to reduce lag
-        --------
-        """
-        # else:
-        #     if self.pos[0] > previous_pos[0]:
-        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Right")
-        #         self.model.grid.place_agent(trace, previous_pos)
-        #     elif self.pos[0] < previous_pos[0]:
-        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Left")
-        #         self.model.grid.place_agent(trace, previous_pos)
-        #     elif self.pos[1] > previous_pos[1]:
-        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Up")
-        #         self.model.grid.place_agent(trace, previous_pos)
-        #     elif self.pos[1] < previous_pos[1]:
-        #         trace = ArrowTrace(self.model.next_id(), previous_pos, self.model, self, "Down")
-        #         self.model.grid.place_agent(trace, previous_pos)
 
     def random_move(self):
         next_moves = self.model.grid.get_neighborhood(self.pos, moore=self.moore, include_center=False)
@@ -142,6 +150,39 @@ class RedWalker(Agent):
         next_moves_copy.append(self.pos)
         next_move = self.random.choice(next_moves_copy)
         self.model.grid.move_agent(self, next_move)
+
+    def non_random_move(self):
+        if not self.finished:
+            if self.following_trace:
+                if self.following_trace.next:
+                    self.model.grid.move_agent(self, self.following_trace.next.pos)
+                    self.following_trace = self.following_trace.next
+                else:
+                    self.move_in_direction(self.following_trace.direction)
+            else:
+                this_cell = self.model.grid.get_cell_list_contents([self.pos])
+                trace = [obj for obj in this_cell if isinstance(obj, ArrowTrace) and obj.owner.finished and isinstance(obj.owner, RedWalker)]
+                if trace:
+                    index = randint(0, len(trace)-1)
+                    if trace[index].next:
+                        self.model.grid.move_agent(self, trace[index].next.pos)
+                        self.following_trace = trace[index].next
+                    else:
+                        self.move_in_direction(trace[index].direction)
+                else:
+                    self.random_move()
+        else:
+            self.random_move()
+
+    def move_in_direction(self, direction):
+        if direction == "Up":
+            self.model.grid.move_agent(self, (self.pos[0], self.pos[1]+1))
+        elif direction == "Down":
+            self.model.grid.move_agent(self, (self.pos[0], self.pos[1]-1))
+        elif direction == "Left":
+            self.model.grid.move_agent(self, (self.pos[0]-1, self.pos[1]))
+        else:
+            self.model.grid.move_agent(self, (self.pos[0]+1, self.pos[1]))
 
 
 class Finish(Agent):
@@ -189,6 +230,7 @@ class Trace(Agent):
 class ArrowTrace(Agent):
     owner = 0
     direction = "Up"
+    next = []
 
     def __init__(self, unique_id, pos, model, owner, direction):
         super().__init__(unique_id, model)
@@ -197,11 +239,16 @@ class ArrowTrace(Agent):
         self.direction = direction
 
     def sprite(self):
-        if self.direction == "Up":
-            return "Model/resources/Up.png"
-        elif self.direction == "Down":
-            return "Model/resources/Down.png"
-        elif self.direction == "Left":
-            return "Model/resources/Left.png"
-        else:
-            return "Model/resources/Right.png"
+        # if self.owner.finished:
+        #     if self.direction == "Up":
+        #         return "Model/resources/Up.png"
+        #     elif self.direction == "Down":
+        #         return "Model/resources/Down.png"
+        #     elif self.direction == "Left":
+        #         return "Model/resources/Left.png"
+        #     else:
+        #         return "Model/resources/Right.png"
+        return ""
+
+    def set_next(self, next_trace):
+        self.next = next_trace
