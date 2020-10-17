@@ -74,7 +74,7 @@ class CyanWalker(RandomWalker):
         next_moves_copy.append(self.pos)
 
         # Add dropping an obstacle to the possibilities
-        if cyan_obstacle == False:
+        if cyan_obstacle == False and self.finished == False:
             next_moves_copy.append("drop_obstacle")
         # Choose a move randomly
         next_move = self.random.choice(next_moves_copy)
@@ -159,7 +159,7 @@ class RedWalker(RandomWalker):
         next_moves_copy.append(self.pos)
 
         # Add dropping an obstacle to the possibilities
-        if red_obstacle == False:
+        if red_obstacle == False and self.finished == False:
             next_moves_copy.append("drop_obstacle")
         # Choose a move randomly
         next_move = self.random.choice(next_moves_copy)
