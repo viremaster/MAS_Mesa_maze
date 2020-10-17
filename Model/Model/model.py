@@ -89,7 +89,7 @@ class WalkerModel(Model):
                         occupied = True
 
             # Make the walker and place it on the grid and the schedule
-            walker = CyanWalker(self.next_id(), (x, y), self, False, False)
+            walker = CyanWalker(self.next_id(), (x, y), self, False)
             self.grid.place_agent(walker, (x, y))
             self.schedule.add(walker)
 
@@ -112,7 +112,7 @@ class WalkerModel(Model):
                      if type(j) == RedWalker:
                         occupied = True
 
-            walker = RedWalker(self.next_id(), (x, y), self, False, False)
+            walker = RedWalker(self.next_id(), (x, y), self, False)
             self.grid.place_agent(walker, (x, y))
             self.schedule.add(walker)
 

@@ -6,32 +6,43 @@ cyan_obstacle = False
 
 class CyanWalker(RandomWalker):
     """
-    Walky boy
+     Walky boy but different colour, comments for this class can be found in the CyanWalker class above
     """
+    global cyan_obstacle
+
     finished = False
     grid = None
     x = None
     y = None
     moore = True
-    cyan_obstacle_present = False
+    cyan_obstacle_present = cyan_obstacle
 
-    def __init__(self, unique_id, pos, model, moore, cyan_obstacle_present):
+    def __init__(self, unique_id, pos, model, moore):
         super().__init__(unique_id, pos, model, moore=moore)
-        self.pos = pos
-        self.moore = moore
         self.finished = False
-        self.cyan_obstacle_present = False
+        self.cyan_obstacle_present = cyan_obstacle
+        self.obstacle = CyanObstacle(self.model.next_id(), self.pos, self.model, 1)
 
     def step(self):
         """
-        A model step. Move. Then check if you have finished, if so set your status to finished.
+        A model step. Move.
         """
+        global cyan_obstacle
+        self.cyan_obstacle_present = cyan_obstacle
+
+        if self.obstacle.present > 11:
+            self.obstacle.present = 0
+            self.model.schedule.remove(self.obstacle)
+            self.model.grid.remove_agent(self.obstacle)
+            cyan_obstacle = False
+
         previous_pos = self.pos
 
         self.random_move()
 
         this_cell = self.model.grid.get_cell_list_contents([self.pos])
         finish = [obj for obj in this_cell if isinstance(obj, Finish)]
+
         if finish:
             self.finished = True
         else:
@@ -49,43 +60,32 @@ class CyanWalker(RandomWalker):
                 self.model.grid.place_agent(trace, previous_pos)
 
     def random_move(self):
-        """
-        Step one cell in any allowable direction.
-        """
-        # Pick the next cell from the adjacent cells
-        next_moves = self.model.grid.get_neighborhood(self.pos, moore=self.moore, include_center=False)
-        # Make a copy of the possible moves
-        next_moves_copy = next_moves.copy()
+        global cyan_obstacle
 
-        # For every possible move
+        next_moves = self.model.grid.get_neighborhood(self.pos, moore=self.moore, include_center=False)
+        next_moves_copy = next_moves.copy()
+        count = 0
         for i in next_moves:
-            # Retrieve the types of the agents within the target of that move
+            count += 1
             i_types = self.model.grid.get_cell_list_contents(i)
-            """
-            You can add the walls into this statement.
-            """
-            # If there are types that are Walkers (or Walls)
             occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, RedObstacle)]
             if occupied:
-                # Remove that move from the possibilities
                 next_moves_copy.remove(i)
-        # Add standing still to the possibilities
         next_moves_copy.append(self.pos)
+
         # Add dropping an obstacle to the possibilities
-        if self.cyan_obstacle_present == False:
+        if cyan_obstacle == False:
             next_moves_copy.append("drop_obstacle")
         # Choose a move randomly
         next_move = self.random.choice(next_moves_copy)
         # Move
-        obstacle = CyanObstacle(self.model.next_id(), self.pos, self.model, 10)
         if next_move != 'drop_obstacle':
             self.model.grid.move_agent(self, next_move)
         else:
-            self.model.grid.place_agent(obstacle, self.pos)
-            self.cyan_obstacle_present = True
-        if obstacle.present == 0:
-            del obstacle
-            self.cyan_obstacle_present = False
+            self.model.grid.place_agent(self.obstacle, self.pos)
+            self.model.schedule.add(self.obstacle)
+            cyan_obstacle = True
+            self.cyan_obstacle_present = cyan_obstacle
 
 
 
@@ -102,19 +102,21 @@ class RedWalker(RandomWalker):
     moore = True
     red_obstacle_present = red_obstacle
 
-    def __init__(self, unique_id, pos, model, moore, red_obstacle_present):
+    def __init__(self, unique_id, pos, model, moore):
         super().__init__(unique_id, pos, model, moore=moore)
         self.finished = False
         self.red_obstacle_present = red_obstacle
-        self.obstacle = RedObstacle(self.model.next_id(), self.pos, self.model, 10)
+        self.obstacle = RedObstacle(self.model.next_id(), self.pos, self.model, 1)
 
     def step(self):
         """
         A model step. Move.
         """
         global red_obstacle
-        if self.obstacle.present == 0:
-            self.obstacle.present = -1
+        self.red_obstacle_present = red_obstacle
+
+        if self.obstacle.present > 11:
+            self.obstacle.present = 0
             self.model.schedule.remove(self.obstacle)
             self.model.grid.remove_agent(self.obstacle)
             red_obstacle = False
@@ -144,6 +146,7 @@ class RedWalker(RandomWalker):
 
     def random_move(self):
         global red_obstacle
+
         next_moves = self.model.grid.get_neighborhood(self.pos, moore=self.moore, include_center=False)
         next_moves_copy = next_moves.copy()
         count = 0
@@ -167,6 +170,7 @@ class RedWalker(RandomWalker):
             self.model.grid.place_agent(self.obstacle, self.pos)
             self.model.schedule.add(self.obstacle)
             red_obstacle = True
+            self.red_obstacle_present = red_obstacle
 
 
 class Finish(Agent):
@@ -195,19 +199,19 @@ class RedObstacle(Agent):
         self.present = present
 
     def step(self):
-        if self.present >= 1:
-            self.present -=1
+        if self.present <= 11:
+            self.present +=1
 
 class CyanObstacle(Agent):
 
-    def __init__(self, unique_id, pos, model, present):
+    def __init__(self,unique_id, pos, model, present):
         super().__init__(unique_id, model)
         self.pos = pos
         self.present = present
 
     def step(self):
-        if self.present >= 1:
-            self.present -=1
+        if self.present <= 11:
+            self.present +=1
 
 class Trace(Agent):
 
