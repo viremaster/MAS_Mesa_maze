@@ -18,6 +18,9 @@ class WalkerModel(Model):
     initial_cyan_walkers = 10
     initial_red_walkers = 10
 
+    cyan_box_drop_chance = 0
+    red_box_drop_chance = 0
+
     cyan_noise = 0
     red_noise = 0
 
@@ -34,7 +37,9 @@ class WalkerModel(Model):
         initial_cyan_walkers=10,
         initial_red_walkers=10,
         cyan_noise=0,
-        red_noise=0
+        red_noise=0,
+        cyan_box_drop_chance = 0,
+        red_box_drop_chance = 0
     ):
         """
         Create a new walker model with the given parameters.
@@ -159,7 +164,7 @@ class WalkerModel(Model):
                         occupied = True
 
             # Make the walker and place it on the grid and the schedule
-            walker = CyanWalker(self.next_id(), (x, y), self, cyan_tracker, False, cyan_noise)
+            walker = CyanWalker(self.next_id(), (x, y), self, cyan_tracker, False, cyan_noise, cyan_box_drop_chance)
             self.grid.place_agent(walker, (x, y))
             self.schedule.add(walker)
 
@@ -183,7 +188,7 @@ class WalkerModel(Model):
                     if type(j) == RedWalker:
                         occupied = True
 
-            walker = RedWalker(self.next_id(), (x, y), self, red_tracker, False, red_noise)
+            walker = RedWalker(self.next_id(), (x, y), self, red_tracker, False, red_noise, red_box_drop_chance)
             self.grid.place_agent(walker, (x, y))
             self.schedule.add(walker)
 

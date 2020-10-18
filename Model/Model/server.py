@@ -93,6 +93,12 @@ model_params = {
     "red_noise": UserSettableParameter(
         "slider", "Red walker noise", 0, 0, 100
     ),
+    "cyan_box_drop_chance": UserSettableParameter(
+        "slider", "Cyan box drop chance", 0, 0, 100
+    ),
+    "red_box_drop_chance": UserSettableParameter(
+        "slider", "Red box drop chance", 0, 0, 100
+    ),
 
 }
 

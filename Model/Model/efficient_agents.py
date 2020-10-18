@@ -24,7 +24,7 @@ class CyanWalker(Agent):
     cyan_obstacle_present = cyan_obstacle
     box_drop_chance = 0
 
-    def __init__(self, unique_id, pos, model, trace_tracker, moore=True, noise=0):
+    def __init__(self, unique_id, pos, model, trace_tracker, moore=True, noise=0, box_drop_chance=0):
         super().__init__(unique_id, model)
         self.pos = pos
         self.moore = moore
@@ -33,6 +33,7 @@ class CyanWalker(Agent):
         self.noise = noise
         self.cyan_obstacle_present = cyan_obstacle
         self.obstacle = CyanObstacle(self.model.next_id(), self.pos, self.model, 1)
+        self.box_drop_chance = box_drop_chance
 
     def step(self):
 
@@ -74,6 +75,7 @@ class CyanWalker(Agent):
             self.finished = True
             self.previous_trace.distance = 1
             self.previous_trace.previous.adjust_distance()
+            self.model.grid.remove_agent(self)
 
     def random_move(self):
         next_moves = self.model.grid.get_neighborhood(self.pos, moore=self.moore, include_center=False)
@@ -119,7 +121,6 @@ class CyanWalker(Agent):
                     else:
                         self.random_move()
                 else:
-                    print("noised")
                     self.random_move()
         else:
             self.random_move()
@@ -153,7 +154,7 @@ class RedWalker(Agent):
     red_obstacle_present = red_obstacle
     box_drop_chance = 0
 
-    def __init__(self, unique_id, pos, model, trace_tracker, moore=True, noise=0):
+    def __init__(self, unique_id, pos, model, trace_tracker, moore=True, noise=0, box_drop_chance=0):
         super().__init__(unique_id, model)
         self.pos = pos
         self.moore = moore
@@ -162,6 +163,7 @@ class RedWalker(Agent):
         self.noise = noise
         self.red_obstacle_present = red_obstacle
         self.obstacle = RedObstacle(self.model.next_id(), self.pos, self.model, 1)
+        self.box_drop_chance = box_drop_chance
 
     def step(self):
         global red_obstacle
@@ -202,6 +204,7 @@ class RedWalker(Agent):
             self.finished = True
             self.previous_trace.distance = 1
             self.previous_trace.previous.adjust_distance()
+            self.model.grid.remove_agent(self)
 
     def random_move(self):
         next_moves = self.model.grid.get_neighborhood(self.pos, moore=self.moore, include_center=False)
@@ -247,7 +250,6 @@ class RedWalker(Agent):
                     else:
                         self.random_move()
                 else:
-                    print("noised")
                     self.random_move()
         else:
             self.random_move()
@@ -286,9 +288,6 @@ class TraceTracker:
             if trace.pos == pos and 0 < trace.distance and (current_length > trace.distance or current_length == -1):
                 current_fastest = trace
                 current_length = trace.distance
-        for trace in self.traces:
-            if current_fastest and trace.pos == current_fastest.pos and trace != current_fastest:
-                self.traces.remove(trace)
         return current_fastest
 
 
@@ -311,5 +310,5 @@ class EfficientTrace:
 
     def adjust_distance(self):
         self.distance = self.next.distance + 1
-        if self.previous:
+        if self.previous and self.distance < 975:
             self.previous.adjust_distance()

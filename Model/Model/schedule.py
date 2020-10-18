@@ -66,7 +66,8 @@ class RandomActivationByColour(RandomActivation):
         agent_keys = list(self.agents_by_colour[colour].keys())
         self.model.random.shuffle(agent_keys)
         for agent_key in agent_keys:
-            self.agents_by_colour[colour][agent_key].step()
+            if not self.agents_by_colour[colour][agent_key].finished:
+                self.agents_by_colour[colour][agent_key].step()
 
     def get_colour_count(self, colour_class):
         """
