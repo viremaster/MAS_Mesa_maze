@@ -2,8 +2,9 @@ from mesa import Model
 from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 
-from .agents import CyanWalker, RedWalker, Finish
+from .agents import Finish
 from .schedule import RandomActivationByColour
+from .efficient_agents import CyanWalker, RedWalker, TraceTracker
 
 
 class WalkerModel(Model):
@@ -17,6 +18,9 @@ class WalkerModel(Model):
     initial_cyan_walkers = 10
     initial_red_walkers = 10
 
+    cyan_noise = 0
+    red_noise = 0
+
     verbose = False  # Print-monitoring
 
     description = (
@@ -29,6 +33,8 @@ class WalkerModel(Model):
         width=20,
         initial_cyan_walkers=10,
         initial_red_walkers=10,
+        cyan_noise=0,
+        red_noise=0
     ):
         """
         Create a new walker model with the given parameters.
@@ -56,6 +62,7 @@ class WalkerModel(Model):
         # Create walkers:
 
         # For each Cyan walker
+        cyan_tracker = TraceTracker()
         for i in range(self.initial_cyan_walkers):
             # Pick a random spot (Within the boundary)
             x = self.random.randrange(0, self.width - 13)
@@ -80,11 +87,12 @@ class WalkerModel(Model):
                         occupied = True
 
             # Make the walker and place it on the grid and the schedule
-            walker = CyanWalker(self.next_id(), (x, y), self, False)
+            walker = CyanWalker(self.next_id(), (x, y), self, cyan_tracker, False, cyan_noise)
             self.grid.place_agent(walker, (x, y))
             self.schedule.add(walker)
 
         # The red walkers work in the same fashion as the Cyan walkers
+        red_tracker = TraceTracker()
         for i in range(self.initial_red_walkers):
             x = self.random.randrange(0, self.width - 13)
             y = self.random.randrange(self.height - 10, self.height)
@@ -103,7 +111,7 @@ class WalkerModel(Model):
                     if type(j) == RedWalker:
                         occupied = True
 
-            walker = RedWalker(self.next_id(), (x, y), self, False)
+            walker = RedWalker(self.next_id(), (x, y), self, red_tracker, False, red_noise)
             self.grid.place_agent(walker, (x, y))
             self.schedule.add(walker)
 

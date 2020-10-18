@@ -2,8 +2,9 @@ from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import CanvasGrid, ChartModule
 from mesa.visualization.UserParam import UserSettableParameter
 
-from .agents import CyanWalker, RedWalker, Finish, Trace, ArrowTrace
+from .agents import Finish, Trace, ArrowTrace
 from .model import WalkerModel
+from .efficient_agents import RedWalker, CyanWalker
 
 
 def walker_portrayal(agent):
@@ -61,6 +62,13 @@ model_params = {
     "initial_red_walkers": UserSettableParameter(
         "slider", "Initial red walkers", 10, 1, 50
     ),
+    "cyan_noise": UserSettableParameter(
+        "slider", "Cyan walker noise", 0, 0, 100
+    ),
+    "red_noise": UserSettableParameter(
+        "slider", "Red walker noise", 0, 0, 100
+    ),
+
 }
 
 server = ModularServer(

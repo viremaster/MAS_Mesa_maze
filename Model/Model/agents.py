@@ -252,3 +252,12 @@ class ArrowTrace(Agent):
 
     def set_next(self, next_trace):
         self.next = next_trace
+
+
+class EfficientArrowTrace():
+    owner = 0
+    direction = "Up"
+    next = []
+
+    def set_next(self, next_trace):
+        self.next = next_trace
