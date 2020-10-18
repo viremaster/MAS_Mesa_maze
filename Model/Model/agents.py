@@ -261,3 +261,34 @@ class EfficientArrowTrace():
 
     def set_next(self, next_trace):
         self.next = next_trace
+
+
+class Wall(Agent):
+
+    def __init__(self, unique_id, pos, model):
+        super().__init__(unique_id, model)
+        self.pos = pos
+
+
+class RedObstacle(Agent):
+
+    def __init__(self, unique_id, pos, model, present):
+        super().__init__(unique_id, model)
+        self.pos = pos
+        self.present = present
+
+    def step(self):
+        if self.present <= 11:
+            self.present += 1
+
+
+class CyanObstacle(Agent):
+
+    def __init__(self, unique_id, pos, model, present):
+        super().__init__(unique_id, model)
+        self.pos = pos
+        self.present = present
+
+    def step(self):
+        if self.present <= 11:
+            self.present += 1

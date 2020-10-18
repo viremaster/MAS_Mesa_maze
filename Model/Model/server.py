@@ -2,7 +2,7 @@ from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import CanvasGrid, ChartModule
 from mesa.visualization.UserParam import UserSettableParameter
 
-from .agents import Finish, Trace, ArrowTrace
+from .agents import Finish, Trace, ArrowTrace, Wall, RedObstacle, CyanObstacle
 from .model import WalkerModel
 from .efficient_agents import RedWalker, CyanWalker
 
@@ -47,10 +47,35 @@ def walker_portrayal(agent):
         portrayal["Shape"] = agent.sprite()
         portrayal["scale"] = 0.9
         portrayal["Layer"] = 0
+
+    elif type(agent) is Wall:
+        portrayal["Color"] = ["#808080"]
+        portrayal["Shape"] = "rect"
+        portrayal["Filled"] = "true"
+        portrayal["Layer"] = 1
+        portrayal["w"] = 1
+        portrayal["h"] = 1
+
+    elif type(agent) is RedObstacle:
+        portrayal["Color"] = ["#AA0000"]
+        portrayal["Shape"] = "rect"
+        portrayal["Filled"] = "true"
+        portrayal["Layer"] = 1
+        portrayal["w"] = 1
+        portrayal["h"] = 1
+
+    elif type(agent) is CyanObstacle:
+        portrayal["Color"] = ["#00FFFF"]
+        portrayal["Shape"] = "rect"
+        portrayal["Filled"] = "true"
+        portrayal["Layer"] = 1
+        portrayal["w"] = 1
+        portrayal["h"] = 1
+
     return portrayal
 
 
-canvas_element = CanvasGrid(walker_portrayal, 20, 20, 500, 500)
+canvas_element = CanvasGrid(walker_portrayal, 30, 30, 500, 500)
 chart_element = ChartModule(
     [{"Label": "Finished Cyan Walkers", "Color": "#00FFFF"}, {"Label": "Finished Red Walkers", "Color": "#AA0000"}]
 )

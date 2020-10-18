@@ -1,12 +1,17 @@
 from mesa import Agent
-from .agents import Finish
+from .agents import Finish, Wall, RedObstacle, CyanObstacle
 from random import randint
+
+red_obstacle = False
+cyan_obstacle = False
 
 
 class CyanWalker(Agent):
     """
     Walky boy but different colour, comments for this class can be found in the CyanWalker class above.
     """
+    global cyan_obstacle
+
     finished = False
     grid = None
     x = None
@@ -16,6 +21,8 @@ class CyanWalker(Agent):
     previous_trace = []
     trace_tracker = None
     noise = 0
+    cyan_obstacle_present = cyan_obstacle
+    box_drop_chance = 0
 
     def __init__(self, unique_id, pos, model, trace_tracker, moore=True, noise=0):
         super().__init__(unique_id, model)
@@ -24,8 +31,19 @@ class CyanWalker(Agent):
         self.finished = False
         self.trace_tracker = trace_tracker
         self.noise = noise
+        self.cyan_obstacle_present = cyan_obstacle
+        self.obstacle = CyanObstacle(self.model.next_id(), self.pos, self.model, 1)
 
     def step(self):
+
+        global cyan_obstacle
+        self.cyan_obstacle_present = cyan_obstacle
+
+        if self.obstacle.present > 11:
+            self.obstacle.present = 0
+            self.model.schedule.remove(self.obstacle)
+            self.model.grid.remove_agent(self.obstacle)
+            cyan_obstacle = False
 
         previous_pos = self.pos
 
@@ -64,7 +82,7 @@ class CyanWalker(Agent):
         for i in next_moves:
             count += 1
             i_types = self.model.grid.get_cell_list_contents(i)
-            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker)]
+            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, RedObstacle)]
             if occupied:
                 next_moves_copy.remove(i)
         next_moves_copy.append(self.pos)
@@ -72,30 +90,37 @@ class CyanWalker(Agent):
         self.model.grid.move_agent(self, next_move)
 
     def non_random_move(self):
+        global cyan_obstacle
+
         if not self.finished:
-            print(self.noise)
-            if randint(1, 100) >= self.noise:
-                trace = self.trace_tracker.find_shortest_trace(self.pos)
-                if trace:
-                    if trace.next:
-                        i_types = self.model.grid.get_cell_list_contents(trace.next.pos)
-                        occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker)]
-                        if occupied:
-                            return
-                        else:
-                            self.model.grid.move_agent(self, trace.next.pos)
-                    else:
-                        i_types = self.model.grid.get_cell_list_contents(self.pointing_at(trace.direction))
-                        occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker)]
-                        if occupied:
-                            return
-                        else:
-                            self.model.grid.move_agent(self, self.pointing_at(trace.direction))
-                else:
-                    self.random_move()
+            if not cyan_obstacle and randint(1, 100) <= self.box_drop_chance:
+                self.model.grid.place_agent(self.obstacle, self.pos)
+                self.model.schedule.add(self.obstacle)
+                cyan_obstacle = True
+                self.cyan_obstacle_present = cyan_obstacle
             else:
-                print("noised")
-                self.random_move()
+                if randint(1, 100) >= self.noise:
+                    trace = self.trace_tracker.find_shortest_trace(self.pos)
+                    if trace:
+                        if trace.next:
+                            i_types = self.model.grid.get_cell_list_contents(trace.next.pos)
+                            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, RedObstacle)]
+                            if occupied:
+                                return
+                            else:
+                                self.model.grid.move_agent(self, trace.next.pos)
+                        else:
+                            i_types = self.model.grid.get_cell_list_contents(self.pointing_at(trace.direction))
+                            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, RedObstacle)]
+                            if occupied:
+                                return
+                            else:
+                                self.model.grid.move_agent(self, self.pointing_at(trace.direction))
+                    else:
+                        self.random_move()
+                else:
+                    print("noised")
+                    self.random_move()
         else:
             self.random_move()
 
@@ -114,6 +139,8 @@ class RedWalker(Agent):
     """
     Walky boy but different colour, comments for this class can be found in the CyanWalker class above.
     """
+    global red_obstacle
+
     finished = False
     grid = None
     x = None
@@ -123,6 +150,8 @@ class RedWalker(Agent):
     previous_trace = []
     trace_tracker = None
     noise = 0
+    red_obstacle_present = red_obstacle
+    box_drop_chance = 0
 
     def __init__(self, unique_id, pos, model, trace_tracker, moore=True, noise=0):
         super().__init__(unique_id, model)
@@ -131,8 +160,18 @@ class RedWalker(Agent):
         self.finished = False
         self.trace_tracker = trace_tracker
         self.noise = noise
+        self.red_obstacle_present = red_obstacle
+        self.obstacle = RedObstacle(self.model.next_id(), self.pos, self.model, 1)
 
     def step(self):
+        global red_obstacle
+        self.red_obstacle_present = red_obstacle
+
+        if self.obstacle.present > 11:
+            self.obstacle.present = 0
+            self.model.schedule.remove(self.obstacle)
+            self.model.grid.remove_agent(self.obstacle)
+            red_obstacle = False
 
         previous_pos = self.pos
 
@@ -171,7 +210,7 @@ class RedWalker(Agent):
         for i in next_moves:
             count += 1
             i_types = self.model.grid.get_cell_list_contents(i)
-            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker)]
+            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, CyanObstacle)]
             if occupied:
                 next_moves_copy.remove(i)
         next_moves_copy.append(self.pos)
@@ -179,30 +218,37 @@ class RedWalker(Agent):
         self.model.grid.move_agent(self, next_move)
 
     def non_random_move(self):
+        global red_obstacle
+
         if not self.finished:
-            print(self.noise)
-            if randint(1, 100) >= self.noise:
-                trace = self.trace_tracker.find_shortest_trace(self.pos)
-                if trace:
-                    if trace.next:
-                        i_types = self.model.grid.get_cell_list_contents(trace.next.pos)
-                        occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker)]
-                        if occupied:
-                            return
-                        else:
-                            self.model.grid.move_agent(self, trace.next.pos)
-                    else:
-                        i_types = self.model.grid.get_cell_list_contents(self.pointing_at(trace.direction))
-                        occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker)]
-                        if occupied:
-                            return
-                        else:
-                            self.model.grid.move_agent(self, self.pointing_at(trace.direction))
-                else:
-                    self.random_move()
+            if not red_obstacle and randint(1, 100) <= self.box_drop_chance:
+                self.model.grid.place_agent(self.obstacle, self.pos)
+                self.model.schedule.add(self.obstacle)
+                red_obstacle = True
+                self.red_obstacle_present = red_obstacle
             else:
-                print("noised")
-                self.random_move()
+                if randint(1, 100) >= self.noise:
+                    trace = self.trace_tracker.find_shortest_trace(self.pos)
+                    if trace:
+                        if trace.next:
+                            i_types = self.model.grid.get_cell_list_contents(trace.next.pos)
+                            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, CyanObstacle)]
+                            if occupied:
+                                return
+                            else:
+                                self.model.grid.move_agent(self, trace.next.pos)
+                        else:
+                            i_types = self.model.grid.get_cell_list_contents(self.pointing_at(trace.direction))
+                            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, CyanObstacle)]
+                            if occupied:
+                                return
+                            else:
+                                self.model.grid.move_agent(self, self.pointing_at(trace.direction))
+                    else:
+                        self.random_move()
+                else:
+                    print("noised")
+                    self.random_move()
         else:
             self.random_move()
 
@@ -240,6 +286,9 @@ class TraceTracker:
             if trace.pos == pos and 0 < trace.distance and (current_length > trace.distance or current_length == -1):
                 current_fastest = trace
                 current_length = trace.distance
+        for trace in self.traces:
+            if current_fastest and trace.pos == current_fastest.pos and trace != current_fastest:
+                self.traces.remove(trace)
         return current_fastest
 
 

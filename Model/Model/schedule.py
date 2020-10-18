@@ -49,7 +49,7 @@ class RandomActivationByColour(RandomActivation):
                       the next one.
         """
         if by_breed:
-            for agent_class in self.agents_by_colour:
+            for agent_class in self.agents_by_colour.copy():
                 self.step_colour(agent_class)
             self.steps += 1
             self.time += 1
