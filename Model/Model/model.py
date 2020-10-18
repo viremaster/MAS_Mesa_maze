@@ -2,7 +2,7 @@ from mesa import Model
 from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 
-from .agents import Finish, Wall
+from .static_objects import Finish, Wall
 from .schedule import RandomActivationByColour
 from .efficient_agents import CyanWalker, RedWalker, TraceTracker
 
@@ -38,8 +38,8 @@ class WalkerModel(Model):
         initial_red_walkers=10,
         cyan_noise=0,
         red_noise=0,
-        cyan_box_drop_chance = 0,
-        red_box_drop_chance = 0
+        cyan_box_drop_chance=0,
+        red_box_drop_chance=0
     ):
         """
         Create a new walker model with the given parameters.
@@ -47,6 +47,10 @@ class WalkerModel(Model):
         Args:
             initial_cyan_walkers: Number of cyan walkers to start with
             initial_red_walkers: Number of red walkers to start with
+            cyan_noise: The chance for cyan walkers to not follow a trace
+            red_noise: The chance for red walkers to not follow a trace
+            cyan_box_drop_chance: The chance for cyan walkers to drop an obstacle
+            red_box_drop_chance: The chance for red walkers to drop an obstacle
         """
         super().__init__()
         # Set parameters
@@ -127,14 +131,9 @@ class WalkerModel(Model):
                   28, 28, 28, 28, 28, 28, 28, 28, 28,
                   29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29]
 
-        # wallsX = [2,3]
-        # wallsY = [5,6]
-
         for i in range(0, len(wallsX)):
             xcor = wallsX[i]
             ycor = wallsY[i]
-            # x = self.random.randrange(0, self.width)
-            # y = self.random.randrange(0, self.height)
             wall = Wall(self.next_id(), (xcor, ycor), self)
             self.grid.place_agent(wall, (xcor, ycor))
 

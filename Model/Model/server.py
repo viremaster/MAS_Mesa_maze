@@ -2,7 +2,7 @@ from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import CanvasGrid, ChartModule
 from mesa.visualization.UserParam import UserSettableParameter
 
-from .agents import Finish, Trace, ArrowTrace, Wall, RedObstacle, CyanObstacle
+from .static_objects import Finish, Wall, RedObstacle, CyanObstacle
 from .model import WalkerModel
 from .efficient_agents import RedWalker, CyanWalker
 
@@ -34,19 +34,6 @@ def walker_portrayal(agent):
         portrayal["Layer"] = 0
         portrayal["w"] = 1
         portrayal["h"] = 1
-
-    elif type(agent) is Trace:
-        portrayal["Color"] = [agent.colour]
-        portrayal["Shape"] = "rect"
-        portrayal["Filled"] = "true"
-        portrayal["Layer"] = 0
-        portrayal["w"] = 1
-        portrayal["h"] = 1
-
-    elif type(agent) is ArrowTrace:
-        portrayal["Shape"] = agent.sprite()
-        portrayal["scale"] = 0.9
-        portrayal["Layer"] = 0
 
     elif type(agent) is Wall:
         portrayal["Color"] = ["#808080"]

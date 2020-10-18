@@ -1,5 +1,5 @@
 from mesa import Agent
-from .agents import Finish, Wall, RedObstacle, CyanObstacle
+from .static_objects import Finish, Wall, RedObstacle, CyanObstacle
 from random import randint
 
 red_obstacle = False
@@ -8,8 +8,9 @@ cyan_obstacle = False
 
 class CyanWalker(Agent):
     """
-    Walky boy but different colour, comments for this class can be found in the CyanWalker class above.
+    Walky boy.
     """
+    # Load the global variable if there is an obstacle
     global cyan_obstacle
 
     finished = False
@@ -36,20 +37,27 @@ class CyanWalker(Agent):
         self.box_drop_chance = box_drop_chance
 
     def step(self):
-
+        """
+        Move, then check if finished
+        """
+        # Check if there is an obstacle
         global cyan_obstacle
         self.cyan_obstacle_present = cyan_obstacle
 
+        # If there is check if it should be removed
         if self.obstacle.present > 11:
             self.obstacle.present = 0
             self.model.schedule.remove(self.obstacle)
             self.model.grid.remove_agent(self.obstacle)
             cyan_obstacle = False
 
+        # Store the previous position
         previous_pos = self.pos
 
+        # Make a move
         self.non_random_move()
 
+        # If you moved, put a trace in the previous square
         if not self.finished and not previous_pos == self.pos:
             if self.pos[0] > previous_pos[0]:
                 trace = EfficientTrace(previous_pos, self, "Right", self.previous_trace)
@@ -69,6 +77,7 @@ class CyanWalker(Agent):
             if self.first:
                 self.first = False
 
+        # Check if you finished, if so remove yourself and update your trace
         this_cell = self.model.grid.get_cell_list_contents([self.pos])
         finish = [obj for obj in this_cell if isinstance(obj, Finish)]
         if finish:
@@ -78,54 +87,64 @@ class CyanWalker(Agent):
             self.model.grid.remove_agent(self)
 
     def random_move(self):
+        """
+        Make a random move
+        """
+        # Make a list of all the moves in your neighborhood
         next_moves = self.model.grid.get_neighborhood(self.pos, moore=self.moore, include_center=False)
         next_moves_copy = next_moves.copy()
-        count = 0
+        # For every move in the list
         for i in next_moves:
-            count += 1
+            # If the square is occupied
             i_types = self.model.grid.get_cell_list_contents(i)
             occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, RedObstacle)]
             if occupied:
+                # Remove the move from the list of possible moves
                 next_moves_copy.remove(i)
+        # Add standing still to the list of possible moves
         next_moves_copy.append(self.pos)
+
+        # Move to a random one of the possible options
         next_move = self.random.choice(next_moves_copy)
         self.model.grid.move_agent(self, next_move)
 
     def non_random_move(self):
+        """
+        Make a move that follows traces if possible, otherwise make a random_move()
+        """
         global cyan_obstacle
 
+        # As long as you haven't finished
         if not self.finished:
+            # Randomly determine whether to place an obstacle
             if not cyan_obstacle and randint(1, 100) <= self.box_drop_chance:
+                # Add an obstacle to the model and schedule also update the variables
                 self.model.grid.place_agent(self.obstacle, self.pos)
                 self.model.schedule.add(self.obstacle)
                 cyan_obstacle = True
                 self.cyan_obstacle_present = cyan_obstacle
             else:
+                # Randomly determine whether to follow a trace or not
                 if randint(1, 100) >= self.noise:
+                    # Find if there is a shortest path among the traces in this square.
                     trace = self.trace_tracker.find_shortest_trace(self.pos)
                     if trace:
-                        if trace.next:
-                            i_types = self.model.grid.get_cell_list_contents(trace.next.pos)
-                            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, RedObstacle)]
-                            if occupied:
-                                return
-                            else:
-                                self.model.grid.move_agent(self, trace.next.pos)
+                        # If there is one, follow it if the space it leads to is not occupied.
+                        i_types = self.model.grid.get_cell_list_contents(self.pointing_at(trace.direction))
+                        occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, RedObstacle)]
+                        if occupied:
+                            return
                         else:
-                            i_types = self.model.grid.get_cell_list_contents(self.pointing_at(trace.direction))
-                            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, RedObstacle)]
-                            if occupied:
-                                return
-                            else:
-                                self.model.grid.move_agent(self, self.pointing_at(trace.direction))
+                            self.model.grid.move_agent(self, self.pointing_at(trace.direction))
                     else:
                         self.random_move()
                 else:
                     self.random_move()
-        else:
-            self.random_move()
 
     def pointing_at(self, direction):
+        """
+        Return the space that a trace is pointing to
+        """
         if direction == "Up":
             return self.pos[0], self.pos[1]+1
         elif direction == "Down":
@@ -209,9 +228,7 @@ class RedWalker(Agent):
     def random_move(self):
         next_moves = self.model.grid.get_neighborhood(self.pos, moore=self.moore, include_center=False)
         next_moves_copy = next_moves.copy()
-        count = 0
         for i in next_moves:
-            count += 1
             i_types = self.model.grid.get_cell_list_contents(i)
             occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, CyanObstacle)]
             if occupied:
@@ -233,20 +250,12 @@ class RedWalker(Agent):
                 if randint(1, 100) >= self.noise:
                     trace = self.trace_tracker.find_shortest_trace(self.pos)
                     if trace:
-                        if trace.next:
-                            i_types = self.model.grid.get_cell_list_contents(trace.next.pos)
-                            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, CyanObstacle)]
-                            if occupied:
-                                return
-                            else:
-                                self.model.grid.move_agent(self, trace.next.pos)
+                        i_types = self.model.grid.get_cell_list_contents(self.pointing_at(trace.direction))
+                        occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, CyanObstacle)]
+                        if occupied:
+                            return
                         else:
-                            i_types = self.model.grid.get_cell_list_contents(self.pointing_at(trace.direction))
-                            occupied = [j for j in i_types if isinstance(j, CyanWalker) or isinstance(j, RedWalker) or isinstance(j, Wall) or isinstance(j, CyanObstacle)]
-                            if occupied:
-                                return
-                            else:
-                                self.model.grid.move_agent(self, self.pointing_at(trace.direction))
+                            self.model.grid.move_agent(self, self.pointing_at(trace.direction))
                     else:
                         self.random_move()
                 else:
@@ -266,6 +275,9 @@ class RedWalker(Agent):
 
 
 class TraceTracker:
+    """
+    A class that keeps track of all the traces of this color.
+    """
     traces = []
 
     def __init__(self):
