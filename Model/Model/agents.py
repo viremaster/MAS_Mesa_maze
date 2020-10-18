@@ -271,6 +271,7 @@ class Wall(Agent):
 
 
 class RedObstacle(Agent):
+    finished = False
 
     def __init__(self, unique_id, pos, model, present):
         super().__init__(unique_id, model)
@@ -283,6 +284,7 @@ class RedObstacle(Agent):
 
 
 class CyanObstacle(Agent):
+    finished = False
 
     def __init__(self, unique_id, pos, model, present):
         super().__init__(unique_id, model)
