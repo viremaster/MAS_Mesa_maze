@@ -83,8 +83,20 @@ model_params = {
     "cyan_box_drop_chance": UserSettableParameter(
         "slider", "Cyan box drop chance", 0, 0, 100
     ),
+    "cyan_box_duration": UserSettableParameter(
+        "slider", "Cyan box duration", 0, 0, 100
+    ),
+    "cyan_box_amount": UserSettableParameter(
+        "slider", "Cyan box amount", 0, 0, 20
+    ),
     "red_box_drop_chance": UserSettableParameter(
         "slider", "Red box drop chance", 0, 0, 100
+    ),
+    "red_box_duration": UserSettableParameter(
+        "slider", "Cyan box duration", 0, 0, 100
+    ),
+    "red_box_amount": UserSettableParameter(
+        "slider", "Cyan box amount", 0, 0, 20
     ),
 
 }

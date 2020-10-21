@@ -2,8 +2,8 @@ from mesa import Agent
 from .static_objects import Finish, Wall, RedObstacle, CyanObstacle
 from random import randint
 
-red_obstacle = False
-cyan_obstacle = False
+red_obstacle = 0
+cyan_obstacle = 0
 
 
 class CyanWalker(Agent):
@@ -24,8 +24,10 @@ class CyanWalker(Agent):
     noise = 0
     cyan_obstacle_present = cyan_obstacle
     box_drop_chance = 0
+    box_duration = 0
+    box_amount = 0
 
-    def __init__(self, unique_id, pos, model, trace_tracker, moore=True, noise=0, box_drop_chance=0):
+    def __init__(self, unique_id, pos, model, trace_tracker, moore=True, noise=0, box_drop_chance=0, box_duration=0, box_amount=0):
         super().__init__(unique_id, model)
         self.pos = pos
         self.moore = moore
@@ -33,8 +35,10 @@ class CyanWalker(Agent):
         self.trace_tracker = trace_tracker
         self.noise = noise
         self.cyan_obstacle_present = cyan_obstacle
-        self.obstacle = CyanObstacle(self.model.next_id(), self.pos, self.model, 1)
+        self.obstacle = CyanObstacle(self.model.next_id(), self.pos, self.model, 0, box_duration)
         self.box_drop_chance = box_drop_chance
+        self.box_duration = box_duration
+        self.box_amount = box_amount
 
     def step(self):
         """
@@ -45,11 +49,11 @@ class CyanWalker(Agent):
         self.cyan_obstacle_present = cyan_obstacle
 
         # If there is check if it should be removed
-        if self.obstacle.present > 11:
+        if self.obstacle.present > self.box_duration:
             self.obstacle.present = 0
             self.model.schedule.remove(self.obstacle)
             self.model.grid.remove_agent(self.obstacle)
-            cyan_obstacle = False
+            cyan_obstacle -= 1
 
         # Store the previous position
         previous_pos = self.pos
@@ -117,11 +121,11 @@ class CyanWalker(Agent):
         # As long as you haven't finished
         if not self.finished:
             # Randomly determine whether to place an obstacle
-            if not cyan_obstacle and randint(1, 100) <= self.box_drop_chance:
+            if cyan_obstacle < self.box_amount and randint(1, 100) <= self.box_drop_chance:
                 # Add an obstacle to the model and schedule also update the variables
                 self.model.grid.place_agent(self.obstacle, self.pos)
                 self.model.schedule.add(self.obstacle)
-                cyan_obstacle = True
+                cyan_obstacle += 1
                 self.cyan_obstacle_present = cyan_obstacle
             else:
                 # Randomly determine whether to follow a trace or not
@@ -172,8 +176,10 @@ class RedWalker(Agent):
     noise = 0
     red_obstacle_present = red_obstacle
     box_drop_chance = 0
+    box_duration = 0
+    box_amount = 0
 
-    def __init__(self, unique_id, pos, model, trace_tracker, moore=True, noise=0, box_drop_chance=0):
+    def __init__(self, unique_id, pos, model, trace_tracker, moore=True, noise=0, box_drop_chance=0, box_duration=0, box_amount=0):
         super().__init__(unique_id, model)
         self.pos = pos
         self.moore = moore
@@ -181,18 +187,20 @@ class RedWalker(Agent):
         self.trace_tracker = trace_tracker
         self.noise = noise
         self.red_obstacle_present = red_obstacle
-        self.obstacle = RedObstacle(self.model.next_id(), self.pos, self.model, 1)
+        self.obstacle = RedObstacle(self.model.next_id(), self.pos, self.model, 0, box_duration)
         self.box_drop_chance = box_drop_chance
+        self.box_duration = box_duration
+        self.box_amount = box_amount
 
     def step(self):
         global red_obstacle
         self.red_obstacle_present = red_obstacle
 
-        if self.obstacle.present > 11:
+        if self.obstacle.present > self.box_duration:
             self.obstacle.present = 0
             self.model.schedule.remove(self.obstacle)
             self.model.grid.remove_agent(self.obstacle)
-            red_obstacle = False
+            red_obstacle -= 1
 
         previous_pos = self.pos
 
@@ -241,10 +249,10 @@ class RedWalker(Agent):
         global red_obstacle
 
         if not self.finished:
-            if not red_obstacle and randint(1, 100) <= self.box_drop_chance:
+            if red_obstacle < self.box_amount and randint(1, 100) <= self.box_drop_chance:
                 self.model.grid.place_agent(self.obstacle, self.pos)
                 self.model.schedule.add(self.obstacle)
-                red_obstacle = True
+                red_obstacle += 1
                 self.red_obstacle_present = red_obstacle
             else:
                 if randint(1, 100) >= self.noise:

@@ -29,14 +29,16 @@ class CyanObstacle(Agent):
     An obstacle agent
     """
     finished = False
+    duration = 0
 
-    def __init__(self, unique_id, pos, model, present):
+    def __init__(self, unique_id, pos, model, present, duration):
         super().__init__(unique_id, model)
         self.pos = pos
         self.present = present
+        self.duration = duration
 
     def step(self):
-        if self.present <= 11:
+        if self.present <= self.duration:
             self.present += 1
 
 
@@ -45,12 +47,14 @@ class RedObstacle(Agent):
     An obstacle agent
     """
     finished = False
+    duration = 0
 
-    def __init__(self, unique_id, pos, model, present):
+    def __init__(self, unique_id, pos, model, present, duration):
         super().__init__(unique_id, model)
         self.pos = pos
         self.present = present
+        self.duration = duration
 
     def step(self):
-        if self.present <= 11:
+        if self.present <= self.duration:
             self.present += 1
