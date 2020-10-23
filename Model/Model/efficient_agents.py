@@ -26,6 +26,8 @@ class CyanWalker(Agent):
     box_drop_chance = 0
     box_duration = 0
     box_amount = 0
+    box_drop_variable = True
+    prev_finished_count = 0
 
     def __init__(self, unique_id, pos, model, trace_tracker, moore=True, noise=0, box_drop_chance=0, box_duration=0, box_amount=0):
         super().__init__(unique_id, model)
@@ -46,6 +48,8 @@ class CyanWalker(Agent):
         """
         # Check if there is an obstacle
         global cyan_obstacle
+        if self.box_drop_variable:
+            self.change_box_chance()
         self.cyan_obstacle_present = cyan_obstacle
 
         # If there is check if it should be removed
@@ -158,6 +162,11 @@ class CyanWalker(Agent):
         else:
             return self.pos[0]+1, self.pos[1]
 
+    def change_box_chance(self):
+        if self.prev_finished_count < self.model.schedule.get_finished_count(CyanWalker):
+            self.prev_finished_count = self.model.schedule.get_finished_count(CyanWalker)
+            self.box_drop_chance = self.prev_finished_count
+
 
 class RedWalker(Agent):
     """
@@ -178,6 +187,8 @@ class RedWalker(Agent):
     box_drop_chance = 0
     box_duration = 0
     box_amount = 0
+    box_drop_variable = True
+    prev_finished_count = 0
 
     def __init__(self, unique_id, pos, model, trace_tracker, moore=True, noise=0, box_drop_chance=0, box_duration=0, box_amount=0):
         super().__init__(unique_id, model)
@@ -195,6 +206,9 @@ class RedWalker(Agent):
     def step(self):
         global red_obstacle
         self.red_obstacle_present = red_obstacle
+
+        if self.box_drop_variable:
+            self.change_box_chance()
 
         if self.obstacle.present > self.box_duration:
             self.obstacle.present = 0
@@ -280,6 +294,11 @@ class RedWalker(Agent):
             return self.pos[0]-1, self.pos[1]
         else:
             return self.pos[0]+1, self.pos[1]
+
+    def change_box_chance(self):
+        if self.prev_finished_count < self.model.schedule.get_finished_count(RedWalker):
+            self.prev_finished_count = self.model.schedule.get_finished_count(RedWalker)
+            self.box_drop_chance = self.prev_finished_count
 
 
 class TraceTracker:

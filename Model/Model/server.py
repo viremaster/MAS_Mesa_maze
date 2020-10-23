@@ -93,10 +93,10 @@ model_params = {
         "slider", "Red box drop chance", 0, 0, 100
     ),
     "red_box_duration": UserSettableParameter(
-        "slider", "Cyan box duration", 0, 0, 100
+        "slider", "Red box duration", 0, 0, 100
     ),
     "red_box_amount": UserSettableParameter(
-        "slider", "Cyan box amount", 0, 0, 20
+        "slider", "Red box amount", 0, 0, 20
     ),
 
 }
