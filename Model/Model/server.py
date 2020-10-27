@@ -69,10 +69,10 @@ chart_element = ChartModule(
 
 model_params = {
     "initial_cyan_walkers": UserSettableParameter(
-        "slider", "Initial cyan walkers", 10, 1, 50
+        "slider", "Initial cyan walkers", 50, 1, 50
     ),
     "initial_red_walkers": UserSettableParameter(
-        "slider", "Initial red walkers", 10, 1, 50
+        "slider", "Initial red walkers", 50, 1, 50
     ),
     "cyan_noise": UserSettableParameter(
         "slider", "Cyan walker noise", 0, 0, 100
@@ -81,22 +81,22 @@ model_params = {
         "slider", "Red walker noise", 0, 0, 100
     ),
     "cyan_box_drop_chance": UserSettableParameter(
-        "slider", "Cyan box drop chance", 0, 0, 100
+        "slider", "Cyan box drop chance", 10, 0, 100
     ),
     "cyan_box_duration": UserSettableParameter(
-        "slider", "Cyan box duration", 0, 0, 100
+        "slider", "Cyan box duration", 10, 0, 100
     ),
     "cyan_box_amount": UserSettableParameter(
-        "slider", "Cyan box amount", 0, 0, 20
+        "slider", "Cyan box amount", 20, 0, 20
     ),
     "red_box_drop_chance": UserSettableParameter(
-        "slider", "Red box drop chance", 0, 0, 100
+        "slider", "Red box drop chance", 10, 0, 100
     ),
     "red_box_duration": UserSettableParameter(
-        "slider", "Red box duration", 0, 0, 100
+        "slider", "Red box duration", 10, 0, 100
     ),
     "red_box_amount": UserSettableParameter(
-        "slider", "Red box amount", 0, 0, 20
+        "slider", "Red box amount", 20, 0, 20
     ),
 
 }
