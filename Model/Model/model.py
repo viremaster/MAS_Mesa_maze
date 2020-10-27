@@ -213,7 +213,7 @@ class WalkerModel(Model):
     def step(self):
         self.schedule.step()
         # collect data
-        self.datacollector.collect(self)
+
         if self.verbose:
             print(
                 [
@@ -231,6 +231,7 @@ class WalkerModel(Model):
 
         for i in range(step_count):
             self.step()
+        self.datacollector.collect(self)
 
         if self.verbose:
             print("")

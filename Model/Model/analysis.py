@@ -68,5 +68,6 @@ def plot_all_vars(df, in_param):
 
 
 for param in ('Finished Cyan Walkers', 'Finished Red Walkers'):
+    print(data)
     plot_all_vars(data, param)
     plt.show()
