@@ -2,9 +2,8 @@ from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import CanvasGrid, ChartModule
 from mesa.visualization.UserParam import UserSettableParameter
 
-from .static_objects import Finish, Wall, RedObstacle, CyanObstacle
 from .model import WalkerModel
-from .efficient_agents import RedWalker, CyanWalker
+from .efficient_agents import RedWalker, CyanWalker, Finish, Wall, RedObstacle, CyanObstacle
 
 
 def walker_portrayal(agent):
@@ -81,22 +80,22 @@ model_params = {
         "slider", "Red walker noise", 0, 0, 100
     ),
     "cyan_box_drop_chance": UserSettableParameter(
-        "slider", "Cyan box drop chance", 10, 0, 100
+        "slider", "Cyan box drop chance", 5, 0, 100
     ),
     "cyan_box_duration": UserSettableParameter(
-        "slider", "Cyan box duration", 10, 0, 100
+        "slider", "Cyan box duration", 5, 0, 100
     ),
     "cyan_box_amount": UserSettableParameter(
-        "slider", "Cyan box amount", 20, 0, 20
+        "slider", "Cyan box amount", 5, 0, 20
     ),
     "red_box_drop_chance": UserSettableParameter(
-        "slider", "Red box drop chance", 10, 0, 100
+        "slider", "Red box drop chance", 5, 0, 100
     ),
     "red_box_duration": UserSettableParameter(
-        "slider", "Red box duration", 10, 0, 100
+        "slider", "Red box duration", 5, 0, 100
     ),
     "red_box_amount": UserSettableParameter(
-        "slider", "Red box amount", 20, 0, 20
+        "slider", "Red box amount", 5, 0, 20
     ),
 
 }

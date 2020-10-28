@@ -2,9 +2,8 @@ from mesa import Model
 from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 
-from .static_objects import Finish, Wall
 from .schedule import RandomActivationByColour
-from .efficient_agents import CyanWalker, RedWalker, TraceTracker
+from .efficient_agents import CyanWalker, RedWalker, TraceTracker, Finish, Wall
 
 
 class WalkerModel(Model):
