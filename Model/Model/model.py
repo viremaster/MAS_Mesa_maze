@@ -14,16 +14,16 @@ class WalkerModel(Model):
     height = 30
     width = 30
 
-    initial_cyan_walkers = 10
-    initial_red_walkers = 10
+    initial_cyan_walkers = 50
+    initial_red_walkers = 50
 
-    cyan_box_drop_chance = 0
-    cyan_box_duration = 0
-    cyan_box_amount = 0
+    cyan_box_drop_chance = 5
+    cyan_box_duration = 10
+    cyan_box_amount = 5
 
-    red_box_drop_chance = 0
-    red_box_duration = 0
-    red_box_amount = 0
+    red_box_drop_chance = 5
+    red_box_duration = 10
+    red_box_amount = 5
 
     cyan_noise = 0
     red_noise = 0
@@ -38,16 +38,16 @@ class WalkerModel(Model):
         self,
         height=30,
         width=30,
-        initial_cyan_walkers=10,
-        initial_red_walkers=10,
+        initial_cyan_walkers=50,
+        initial_red_walkers=50,
         cyan_noise=0,
         red_noise=0,
-        cyan_box_drop_chance=0,
-        cyan_box_duration=0,
-        cyan_box_amount=0,
-        red_box_drop_chance=0,
-        red_box_duration=0,
-        red_box_amount=0
+        cyan_box_drop_chance=5,
+        cyan_box_duration=10,
+        cyan_box_amount=5,
+        red_box_drop_chance=5,
+        red_box_duration=10,
+        red_box_amount=5
     ):
         """
         Create a new walker model with the given parameters.
