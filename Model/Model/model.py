@@ -73,6 +73,8 @@ class WalkerModel(Model):
             {
                 "Finished Cyan Walkers": lambda m: m.schedule.get_finished_count(CyanWalker),
                 "Finished Red Walkers": lambda m: m.schedule.get_finished_count(RedWalker),
+                "Average Finished Cyan Walkers": lambda m: m.schedule.average_steps(CyanWalker),
+                "Average Finished Red Walkers": lambda m: m.schedule.average_steps(RedWalker),
             }
         )
 
@@ -211,7 +213,6 @@ class WalkerModel(Model):
 
     def step(self):
         self.schedule.step()
-        # collect data
 
         if self.verbose:
             print(

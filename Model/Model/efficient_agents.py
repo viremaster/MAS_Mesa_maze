@@ -26,6 +26,7 @@ class CyanWalker(Agent):
     box_amount = 0
     box_drop_variable = True
     prev_finished_count = 0
+    steps = 0
 
     def __init__(self, unique_id, pos, model, trace_tracker, moore=True, noise=0, box_drop_chance=0, box_duration=0, box_amount=0):
         super().__init__(unique_id, model)
@@ -47,6 +48,7 @@ class CyanWalker(Agent):
         if self.box_drop_variable:
             self.change_box_chance()
 
+        self.steps += 1
         # Store the previous position
         previous_pos = self.pos
 
@@ -176,6 +178,7 @@ class RedWalker(Agent):
     box_amount = 0
     box_drop_variable = True
     prev_finished_count = 0
+    steps = 0
 
     def __init__(self, unique_id, pos, model, trace_tracker, moore=True, noise=0, box_drop_chance=0, box_duration=0, box_amount=0):
         super().__init__(unique_id, model)
@@ -193,6 +196,8 @@ class RedWalker(Agent):
 
         if self.box_drop_variable:
             self.change_box_chance()
+
+        self.steps += 1
 
         previous_pos = self.pos
 

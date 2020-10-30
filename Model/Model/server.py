@@ -63,7 +63,7 @@ def walker_portrayal(agent):
 
 canvas_element = CanvasGrid(walker_portrayal, 30, 30, 500, 500)
 chart_element = ChartModule(
-    [{"Label": "Finished Cyan Walkers", "Color": "#00FFFF"}, {"Label": "Finished Red Walkers", "Color": "#AA0000"}]
+    [{"Label": "Average Finished Cyan Walkers", "Color": "#00FFFF"}, {"Label": "Average Finished Red Walkers", "Color": "#AA0000"}]
 )
 
 model_params = {

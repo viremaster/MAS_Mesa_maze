@@ -17,6 +17,7 @@ class RandomActivationByColour(RandomActivation):
     def __init__(self, model):
         super().__init__(model)
         self.agents_by_colour = defaultdict(dict)
+        self.agents_by_colour_copy = defaultdict(dict)
 
     def add(self, agent):
         """
@@ -29,6 +30,7 @@ class RandomActivationByColour(RandomActivation):
         self._agents[agent.unique_id] = agent
         agent_class = type(agent)
         self.agents_by_colour[agent_class][agent.unique_id] = agent
+        self.agents_by_colour_copy = self.agents_by_colour.copy()
 
     def remove(self, agent):
         """
@@ -85,3 +87,9 @@ class RandomActivationByColour(RandomActivation):
             if self.agents_by_colour[colour_class][agent_key].finished:
                 finished += 1
         return finished
+
+    def average_steps(self, colour_class):
+        total_steps = 0
+        for i in self.agents_by_colour_copy[colour_class].keys():
+            total_steps += self.agents_by_colour_copy[colour_class][i].steps
+        return total_steps / 50
